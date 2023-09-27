@@ -4,6 +4,8 @@ import ContactForm from 'ContactForm';
 import shortid from 'shortid';
 import Filter from './Filter';
 
+import { Container, SubTitle, MainTitle } from './App.styled';
+
 class App extends Component {
   state = {
     contacts: [
@@ -16,29 +18,34 @@ class App extends Component {
   };
 
   formSubmitHandler = data => {
-    const {name, phone} = data
+    const contactNames = this.state.contacts.map(contact => contact.name);
 
     const contact = {
       id: shortid.generate(),
-      name,
-      number: phone,
+      name: data.name,
+      number: data.phone,
+    };
+    if (contactNames.includes(data.name)) {
+      alert(`${data.name} is already in contacts.`);
+    } else {
+      this.setState(({ contacts }) => ({
+        contacts: [contact, ...contacts],
+      }));
     }
-
-    this.setState(prevState => ({
-      contacts: [contact, ...prevState.contacts]
-    }))
-  }
+  };
 
   filterContactsHandler = e => {
-    this.setState({filter: e.currentTarget.value})
-  }
+    this.setState({ filter: e.currentTarget.value });
+  };
 
   renderContactsFilter = () => {
-    const {contacts, filter} = this.state;
+    const { contacts, filter } = this.state;
 
-    const normalizedFilter = filter.toLocaleLowerCase()
-    return contacts.filter(contact => contact.name.toLocaleLowerCase().includes(normalizedFilter))
-  }
+    const normalizedFilter = filter.toLocaleLowerCase();
+    return contacts.filter(contact =>
+      contact.name.toLocaleLowerCase().includes(normalizedFilter)
+    );
+  };
 
   deleteContact = numberId => {
     this.setState(prevState => ({
@@ -47,18 +54,24 @@ class App extends Component {
   };
 
   render() {
-    const {filter} = this.state;
-    const visibleContacts = this.renderContactsFilter()
+    const { filter } = this.state;
+    const visibleContacts = this.renderContactsFilter();
 
     return (
       <>
-        <Filter filter={filter} onFilterHandler={this.filterContactsHandler}/>
-        <ContactList
-          contacts={visibleContacts}
-          onDelete={this.deleteContact}
-        />
-
-        <ContactForm onSubmit={this.formSubmitHandler}/>
+        <Container>
+          <MainTitle>Phonebook</MainTitle>
+          <ContactForm onSubmit={this.formSubmitHandler} />
+          <SubTitle>Contacts</SubTitle>
+          <Filter
+            filter={filter}
+            onFilterHandler={this.filterContactsHandler}
+          />
+          <ContactList
+            contacts={visibleContacts}
+            onDelete={this.deleteContact}
+          />
+        </Container>
       </>
     );
   }
